@@ -6,11 +6,19 @@
 
 
 # ---- Lê planilha de metadados que orienta toda a coleta ----
-df_metadados = pd.read_excel(
-    io = "https://docs.google.com/spreadsheets/d/1x8Ugm7jVO7XeNoxiaFPTPm1mfVc3JUNvvVqVjCioYmE/export?format=xlsx",
-    sheet_name = "Metadados"
-)
+# df_metadados = pd.read_excel(
+#     io = "https://docs.google.com/spreadsheets/d/1Dy317e6l_TbKlR7rokg-IWLdg0K42xQyH9yFkNnKgYw/edit?usp=sharing",
+#     sheet_name = "Metadados"
+# )
 
+file_id = "1Dy317e6l_TbKlR7rokg-IWLdg0K42xQyH9yFkNnKgYw"
+export_url = f"https://docs.google.com/spreadsheets/d/{file_id}/export?format=xlsx"
+
+df_metadados = pd.read_excel(
+    io = export_url,
+    sheet_name = "Metadados",
+    dtype = str
+)
 
 # ==========================================================
 # COLETA: Banco Central / SGS

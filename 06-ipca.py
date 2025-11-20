@@ -17,6 +17,8 @@
 # Configurações e parâmetros
 # =========================
 # h: horizonte em meses; inicio_treino: data inicial da amostra; semente: random seed.
+import 01-bibliotecas
+
 h = 12  # horizonte de previsão
 inicio_treino = pd.to_datetime("2004-01-01")  # amostra inicial de treinamento
 semente = 1984  # semente para reprodução
