@@ -17,7 +17,10 @@
 # Configurações e parâmetros
 # =========================
 # h: horizonte em meses; inicio_treino: data inicial da amostra; semente: random seed.
-import 01-bibliotecas
+import pandas as pd
+import numpy as np
+import os, time
+from datetime import datetime, timedelta
 
 h = 12  # horizonte de previsão
 inicio_treino = pd.to_datetime("2004-01-01")  # amostra inicial de treinamento
