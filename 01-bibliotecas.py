@@ -1,4 +1,6 @@
-# Importa bibliotecas
+# ==========================================================
+# MÓDULO DE BIBLIOTECAS USADAS NO PROJETO
+# ==========================================================
 import pandas as pd
 import numpy as np
 import os, time

@@ -1,13 +1,27 @@
+# ==========================================================
+# MÓDULO DE TRATAMENTO E CRUZAMENTO DE DADOS BRUTOS
+# Objetivo: unir, agrupar e padronizar séries coletadas de
+# múltiplas fontes (BCB/SGS, BCB/ODATA, IPEA, SIDRA, FRED, IFI),
+# convertendo frequências e calculando agregações de interesse.
+# ==========================================================
+
+
 # Cruza dados do BCB/SGS
+# Para cada frequência (Diária/Mensal/Trimestral/Anual) concatena/une
+# as várias séries coletadas naquela frequência em um único DataFrame.
 df_tratado_bcb_sgs = df_bruto_bcb_sgs.copy()
 
 for f in df_tratado_bcb_sgs.items():
-  df_temp = f[1][0]
-  for df in f[1][1:]:
+  df_temp = f[1][0]                       # começa com o primeiro DataFrame da lista
+  for df in f[1][1:]:                     # une os demais por outer join
     df_temp = df_temp.join(other = df, how = "outer")
-  df_tratado_bcb_sgs[f[0]] = df_temp
+  df_tratado_bcb_sgs[f[0]] = df_temp      # armazena o DataFrame combinado de volta
+
 
 # Agrega dados de frequência diária para mensal por média ou início de mês
+# - transforma séries diárias (exceto selic) para média mensal
+# - para 'selic' pega a primeira observação do mês (headline policy)
+# - junta tudo ao DataFrame Mensal já existente e força float
 df_tratado_bcb_sgs["Mensal"] = df_tratado_bcb_sgs["Mensal"].join(
     other = (
         df_tratado_bcb_sgs["Diária"]
@@ -22,7 +36,7 @@ df_tratado_bcb_sgs["Mensal"] = df_tratado_bcb_sgs["Mensal"].join(
                 .reset_index()
                 .assign(data = lambda x: x.data.dt.to_period("M").dt.to_timestamp())
                 .groupby("data")
-                .head(1)
+                .head(1)                     # pega a primeira observação do mês para 'selic'
                 .set_index("data")
             ),
             how = "outer"
@@ -34,6 +48,7 @@ df_tratado_bcb_sgs["Mensal"] = df_tratado_bcb_sgs["Mensal"].join(
 
 
 # Filtra expectativas curto prazo ~1 mês à frente e agrega pela média
+# Seleciona horizontes ~1 mês nas tabelas ODATA e tira média por mês
 df_tratado_bcb_odata_ipca_cp = (
     df_bruto_bcb_odata[0]
     .assign(
@@ -46,7 +61,8 @@ df_tratado_bcb_odata_ipca_cp = (
     .mean()
 )
 
-# Filtra expectativas médio prazo ~6 mês à frente e agrega pela média
+
+# Filtra expectativas médio prazo ~6 meses à frente e agrega pela média
 df_tratado_bcb_odata_ipca_mp = (
     df_bruto_bcb_odata[1]
     .assign(
@@ -59,7 +75,9 @@ df_tratado_bcb_odata_ipca_mp = (
     .mean()
 )
 
+
 # Filtra expectativas longo prazo ~1 ano à frente e agrega pela média
+# (aqui DataReferencia é anual)
 df_tratado_bcb_odata_selic = (
     df_bruto_bcb_odata[2]
     .assign(
@@ -72,7 +90,8 @@ df_tratado_bcb_odata_selic = (
     .mean()
 )
 
-# Filtra expectativas curto prazo ~1 mês à frente e agrega pela média
+
+# Filtra expectativas curto prazo ~1 mês à frente (câmbio) e agrega pela média
 df_tratado_bcb_odata_cambio = (
     df_bruto_bcb_odata[3]
     .assign(
@@ -85,6 +104,7 @@ df_tratado_bcb_odata_cambio = (
     .mean()
 )
 
+
 # Filtra expectativas curto prazo ~12 meses à frente e agrega pela média
 df_tratado_bcb_odata_ipca_lp = (
     df_bruto_bcb_odata[4]
@@ -93,7 +113,8 @@ df_tratado_bcb_odata_ipca_lp = (
     .mean()
 )
 
-# Filtra expectativas médio prazo ~9 meses à frente e agrega pela média
+
+# Filtra expectativas médio prazo ~9 meses à frente (PIB trimestral) e agrega pela média
 df_tratado_bcb_odata_pib = (
     df_bruto_bcb_odata[5]
     .assign(
@@ -109,7 +130,8 @@ df_tratado_bcb_odata_pib = (
     .mean()
 )
 
-# Filtra expectativas longo prazo ~1 ano à frente e agrega pela média
+
+# Filtra expectativas longo prazo ~1 ano à frente (primário) e agrega pela média
 df_tratado_bcb_odata_primario = (
     df_bruto_bcb_odata[6]
     .assign(
@@ -122,7 +144,8 @@ df_tratado_bcb_odata_primario = (
     .mean()
 )
 
-# Cruza dados de mesma frequência
+
+# Cruza dados de mesma frequência (monta o DataFrame mensal final de expectativas)
 df_tratado_bcb_odata_lista = [
     df_tratado_bcb_odata_ipca_mp,
     df_tratado_bcb_odata_ipca_lp,
@@ -141,6 +164,7 @@ for df in df_tratado_bcb_odata_lista:
 
 
 # Cruza dados do IPEADATA
+# Para cada frequência une as várias séries e indexa por datetime UTC
 df_tratado_ipeadata = df_bruto_ipeadata.copy()
 
 for f in df_tratado_ipeadata.items():
@@ -152,7 +176,9 @@ for f in df_tratado_ipeadata.items():
         )
   df_tratado_ipeadata[f[0]] = df_temp
 
-# Agrega dados de frequência diária para mensal por média
+
+# Agrega dados de frequência diária para mensal por média (IPEA)
+# Converte datas para mês e junta média diária convertida por mês
 df_tratado_ipeadata["Mensal"] = (
     df_tratado_ipeadata["Mensal"]
     .reset_index()
@@ -174,12 +200,13 @@ df_tratado_ipeadata["Mensal"] = (
 
 
 # Cruza dados do IBGE/SIDRA
+# Ajusta formatos de data (strings compactas) para timestamps mensais/trimestrais
 df_tratado_ibge_sidra = df_bruto_ibge_sidra.copy()
 
 for f in df_tratado_ibge_sidra.items():
   df_temp = (
       f[1][0]
-      .iloc[1:]
+      .iloc[1:]   # pula possível linha de cabeçalho extra
       .assign(
           data = lambda x: pd.PeriodIndex(
             x.data.str.replace(r"(\d{4})(\d{1})(\d{1})", r"\1-\2\3" if f[0] == "Mensal" else r"\1-Q\3", regex = True),
@@ -207,6 +234,7 @@ for f in df_tratado_ibge_sidra.items():
 
 
 # Cruza dados do FRED
+# Converte 'observation_date' para datetime, une por outer join e renomeia índice para 'data'
 df_tratado_fred = df_bruto_fred.copy()
 
 for f in df_tratado_fred.items():
@@ -219,7 +247,8 @@ for f in df_tratado_fred.items():
   df_temp = df_temp.rename_axis(index='data')  
   df_tratado_fred[f[0]] = df_temp
 
-# Agrega dados de frequência diária para mensal por média
+
+# Agrega dados de frequência diária para mensal por média (FRED)
 df_tratado_fred["Mensal"] = (
     df_tratado_fred["Mensal"]
     .set_index(pd.to_datetime(df_tratado_fred["Mensal"].index))
@@ -235,7 +264,9 @@ df_tratado_fred["Mensal"] = (
     .query("index >= '2000-01-01'")
 )
 
+
 # Representa em porcentagem dados do IFI
+# Multiplica hiato por 100, filtra a partir de 2000 e remove limites
 df_tratado_ifi = (
     df_bruto_ifi
     .assign(hiato_produto = lambda x: x.hiato_produto.mul(100))

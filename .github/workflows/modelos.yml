@@ -41,6 +41,14 @@ jobs:
           poetry run python 08-pib.py
           poetry run python -c "exec('import time;time.sleep(61)')"
           poetry run python 09-selic.py
+          poetry run python -c "exec('import time;time.sleep(61)')"
+          poetry run python 10-desemprego.py
+          poetry run python -c "exec('import time;time.sleep(61)')"
+          poetry run python 11-producao_industrial.py
+          poetry run python -c "exec('import time;time.sleep(61)')"
+          poetry run python 12-resultado_fiscal.py
+          poetry run python -c "exec('import time;time.sleep(61)')"
+          poetry run python 13-balanca_comercial.py
 
       - name: Commit & Push
         uses: stefanzweifel/git-auto-commit-action@v5
