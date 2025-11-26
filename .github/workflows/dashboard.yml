@@ -11,7 +11,7 @@ on:
 jobs:
   Shinyapps:
     runs-on: ubuntu-22.04
-    
+
     steps:
       - name: Clonar repositório
         uses: actions/checkout@v4
