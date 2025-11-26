@@ -45,5 +45,4 @@ jobs:
       - name: Commit & Push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: Atualização automática de 
-          
+          commit_message: Atualização automática de previsões
