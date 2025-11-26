@@ -1,0 +1,14 @@
+fastparquet==2024.5.0
+mizani==0.11.4
+pandas==2.2.2
+plotnine==0.13.6
+pyarrow==17.0.0
+shiny==1.0.0
+shinyswatch==0.7.0
+faicons==0.2.2
+numpy==2.1.0
+skforecast==0.13.0
+statsmodels==0.14.2
+scikit-learn==1.5.1
+openpyxl==3.1.5
+jinja2==3.1.2
